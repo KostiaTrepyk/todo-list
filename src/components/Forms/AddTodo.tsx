@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Button, StyleSheet, TextInput, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 interface AddTodoFormProps {
   AddTodo: (title: string) => void;
@@ -15,6 +21,8 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({ AddTodo }) => {
     AddTodo(title);
   }
 
+  const isDisabledAddBtn: boolean = !title;
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -22,8 +30,14 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({ AddTodo }) => {
         value={title}
         onChange={(e) => setTitle(e.nativeEvent.text)}
         onSubmitEditing={AddTodoHandler}
+        multiline
       />
-      <Button title="Add" onPress={AddTodoHandler} disabled={!title} />
+
+      <View style={[styles.addBtnWrapper, isDisabledAddBtn && styles.disabled]}>
+        <TouchableOpacity onPress={AddTodoHandler} disabled={isDisabledAddBtn}>
+          <Text style={styles.addBtnText}>+</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -35,13 +49,37 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     marginTop: "auto",
+    gap: 4,
+    maxWidth: "100%",
+    overflow: "hidden",
   },
   input: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     borderWidth: 1,
+    borderColor: "#999",
+    borderRadius: 50,
     flexGrow: 1,
     backgroundColor: "#fff",
-    borderTopLeftRadius: 5,
-    borderBottomLeftRadius: 5,
+    maxWidth: "86%" /* Fix  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */,
+  },
+
+  addBtnWrapper: {
+    height: 45,
+    backgroundColor: "#ffff",
+    aspectRatio: 1 / 1,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 50,
+    borderWidth: 1,
+    borderColor: "#999",
+  },
+  addBtnText: {
+    color: "#444",
+    fontSize: 20,
+    transform: [{ scale: 1.6 }],
+  },
+  disabled: {
+    opacity: 0.5,
   },
 });
