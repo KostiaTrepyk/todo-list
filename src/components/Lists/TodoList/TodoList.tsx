@@ -6,24 +6,36 @@ import EmptyTodoList from "./EmptyTodoList";
 
 interface TodoListProps {
   todos: Todo[];
-  finishTodo: (todo: Todo) => void;
+  restoreTodoHandler: (todo: Todo) => void;
+  finishTodoHandler: (todo: Todo) => void;
+  deleteTodoHandler: (id: number) => void;
+  hideDone?: boolean;
 }
 
-const TodoList: React.FC<TodoListProps> = ({ todos, finishTodo }) => {
+const TodoList: React.FC<TodoListProps> = ({
+  todos,
+  restoreTodoHandler,
+  finishTodoHandler,
+  deleteTodoHandler,
+  hideDone = false,
+}) => {
+  const data = hideDone ? todos.filter((todo) => !todo.isDone) : todos;
+
   return (
     <FlatList
-      data={todos}
+      data={data}
       renderItem={({ item }) => (
-        <TodoListItem todo={item} finishTodo={finishTodo} />
+        <TodoListItem
+          todo={item}
+          finishTodoHandler={finishTodoHandler}
+          restoreTodoHandler={restoreTodoHandler}
+          deleteTodoHandler={deleteTodoHandler}
+        />
       )}
       keyExtractor={(item) => item.id.toString()}
       ListEmptyComponent={<EmptyTodoList />}
       style={styles.container}
-    >
-      {todos.map((todo) => (
-        <TodoListItem key={todo.id} todo={todo} finishTodo={finishTodo} />
-      ))}
-    </FlatList>
+    />
   );
 };
 

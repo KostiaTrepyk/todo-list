@@ -1,49 +1,63 @@
 import { useEffect, useState } from "react";
-import { StatusBar, StyleSheet, Text, View } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  ActivityIndicator,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
+
+import {
+  loadHideDone,
+  loadTodos,
+  saveHideDone,
+  saveTodos,
+} from "../storage/storage";
 
 import { type Todo } from "../components/Lists/TodoList/types";
 import AddTodoForm from "../components/Forms/AddTodo";
 import TodoList from "../components/Lists/TodoList/TodoList";
-
-const storeData = async (value: Todo[]) => {
-  try {
-    const jsonValue = JSON.stringify(value);
-    await AsyncStorage.setItem("todos", jsonValue);
-  } catch (e) {
-    // saving error
-  }
-};
-
-const getData = async () => {
-  try {
-    const value = await AsyncStorage.getItem("todos");
-
-    if (value !== null) {
-      return JSON.parse(value) as Todo[];
-    }
-  } catch (e) {
-    // error reading value
-  }
-};
+import LoadingScreen from "./LoadingScreen";
 
 const HomeScreen = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [hideDone, setHideDone] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    getData().then((data) => {
-      if (data) setTodos(data);
+    (async () => {
+      await loadTodos().then((data) => {
+        if (data !== undefined) setTodos(data);
+      });
+      await loadHideDone().then((data) => {
+        if (data !== undefined) setHideDone(data);
+      });
+    })().then(() => {
+      setIsLoading(false);
     });
   }, []);
 
-  useEffect(() => {
-    storeData(todos);
-  }, [todos]);
+  function restoreTodoHandler(todo: Todo) {
+    setTodos((prev) => {
+      const result = [...prev];
+      const i = prev.findIndex((_todo) => _todo.id === todo.id);
+      result[i] = { ...result[i], isDone: false };
+
+      saveTodos(result);
+      return result;
+    });
+  }
 
   function finishTodoHandler(todo: Todo) {
-    setTodos((prev) =>
-      prev.filter((prevTodo) => prevTodo.createdAt !== todo.createdAt)
-    );
+    setTodos((prev) => {
+      const result = [...prev];
+      const i = prev.findIndex((_todo) => _todo.id === todo.id);
+      result[i] = { ...result[i], isDone: true };
+
+      saveTodos(result);
+      return result;
+    });
   }
 
   function AddTodoHandler(title: string) {
@@ -54,17 +68,53 @@ const HomeScreen = () => {
         isDone: false,
         createdAt: new Date(),
       };
+
+      saveTodos([...prev, newTodo]);
       return [...prev, newTodo];
     });
   }
 
+  function deleteTodoHandler(id: number) {
+    setTodos((prev) => {
+      const result = prev.filter((prevTodo) => prevTodo.id !== id);
+
+      saveTodos(result);
+      return result;
+    });
+  }
+
+  if (isLoading) return <LoadingScreen />;
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="default" /* animated hidden */ />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={styles.container.backgroundColor}
+      />
 
-      <Text style={styles.text}>Tasks</Text>
+      <View style={styles.titleContaner}>
+        <Text style={styles.title}>Today's tasks</Text>
 
-      <TodoList todos={todos} finishTodo={finishTodoHandler} />
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchLabel}>Hide done</Text>
+          <Switch
+            value={hideDone}
+            onChange={(e) => {
+              setHideDone(e.nativeEvent.value);
+              saveHideDone(e.nativeEvent.value);
+            }}
+            thumbColor={styles.switch.color}
+          />
+        </View>
+      </View>
+
+      <TodoList
+        todos={todos}
+        finishTodoHandler={finishTodoHandler}
+        restoreTodoHandler={restoreTodoHandler}
+        deleteTodoHandler={deleteTodoHandler}
+        hideDone={hideDone}
+      />
 
       <AddTodoForm AddTodo={AddTodoHandler} />
     </View>
@@ -83,7 +133,25 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 
-  text: {
-    fontSize: 24,
+  titleContaner: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  title: {
+    color: "#444",
+    fontSize: 28,
+    fontWeight: "900",
+  },
+
+  switchContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  switchLabel: {},
+  switch: {
+    color: "#0090ff",
   },
 });
