@@ -2,6 +2,15 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { type Todo } from "./types";
 
+/**
+ * @param {Date} date - The `date` parameter is a `Date` object that represents the creation time of a
+ * todo item.
+ * @returns a string representing the time of creation of a todo item. The string will be in one of the
+ * following formats:
+ * - "Today, HH:MM" if the todo item was created today.
+ * - "Yesterday, HH:MM" if the todo item was created yesterday.
+ * - The full date and time in the format "MM/DD/YYYY, HH:MM" for any other date
+ */
 function getTodoTimeCreation(date: Date): string {
   const time = date.toLocaleTimeString().slice(0, -3);
 
@@ -90,6 +99,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     elevation: 2,
+    margin: 3,
   },
   textContainer: {
     flexGrow: 1,

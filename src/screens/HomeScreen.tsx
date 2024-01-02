@@ -25,17 +25,27 @@ const HomeScreen = () => {
   const [hideDone, setHideDone] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  /* Load the todos and hideDone state from storage when the component mounts. */
   useEffect(() => {
-    (async () => {
-      await loadTodos().then((data) => {
-        if (data !== undefined) setTodos(data);
-      });
-      await loadHideDone().then((data) => {
-        if (data !== undefined) setHideDone(data);
-      });
-    })().then(() => {
-      setIsLoading(false);
-    });
+    const fetchData = async () => {
+      try {
+        const todosData = await loadTodos();
+        if (todosData !== undefined) {
+          setTodos(todosData);
+        }
+
+        const hideDoneData = await loadHideDone();
+        if (hideDoneData !== undefined) {
+          setHideDone(hideDoneData);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   function restoreTodoHandler(todo: Todo) {
