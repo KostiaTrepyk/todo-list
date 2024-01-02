@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,11 +14,15 @@ interface AddTodoFormProps {
 const AddTodoForm: React.FC<AddTodoFormProps> = ({ AddTodo }) => {
   const [title, setTitle] = useState<string>("");
 
+  const inputRef = useRef<TextInput>(null);
+
   function AddTodoHandler() {
     if (!title) return;
 
     setTitle("");
     AddTodo(title);
+
+    inputRef.current?.blur();
   }
 
   const isDisabledAddBtn: boolean = !title;
@@ -26,10 +30,15 @@ const AddTodoForm: React.FC<AddTodoFormProps> = ({ AddTodo }) => {
   return (
     <View style={styles.container}>
       <TextInput
+        ref={inputRef}
         style={styles.input}
+        placeholder="Write a task..."
         value={title}
         onChange={(e) => setTitle(e.nativeEvent.text)}
         onSubmitEditing={AddTodoHandler}
+        selectTextOnFocus
+        scrollEnabled
+        blurOnSubmit
         multiline
       />
 
@@ -52,27 +61,29 @@ const styles = StyleSheet.create({
     gap: 4,
     maxWidth: "100%",
     overflow: "hidden",
+    alignItems: "flex-end",
+    backgroundColor: "#fff",
+    borderRadius: 25,
+    elevation: 1,
   },
   input: {
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: "#999",
-    borderRadius: 50,
+    minHeight: 55,
+    maxHeight: 100,
+    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderRadius: 25,
     flexGrow: 1,
-    backgroundColor: "#fff",
-    maxWidth: "86%" /* Fix  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */,
+    flexShrink: 1,
   },
 
   addBtnWrapper: {
-    height: 45,
-    backgroundColor: "#ffff",
+    height: 55,
     aspectRatio: 1 / 1,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 50,
-    borderWidth: 1,
-    borderColor: "#999",
+    borderRadius: 25,
   },
   addBtnText: {
     color: "#444",
