@@ -103,14 +103,20 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     flexGrow: 1,
+    flexShrink: 1,
   },
-  title: { fontSize: 18 },
-  date: { fontSize: 11 },
+  title: {
+    fontSize: 18,
+  },
+  date: {
+    fontSize: 11,
+  },
 
   buttonContainer: {
     display: "flex",
     flexDirection: "row",
     gap: 6,
+    height: 40,
   },
 
   button: {
